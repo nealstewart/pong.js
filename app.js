@@ -25,6 +25,22 @@ io.sockets.on('connection', function(socket) {
     room.join(socket, playerNumber, userName);
   });
 
+  socket.on('player-ready', function() {
+    room.registerPlayerAsReady(socket);
+  });
+
+  socket.on('game-countdown', function(currentCount) {
+    room.emitCountdown(currentCount);
+  });
+
+  socket.on('game-start', function(gameState) {
+    room.emitGameStart(gameState);
+  });
+
+  socket.on('game-tick', function(gameState) {
+    room.emitGameTick(gameState);
+  });
+
   socket.on('disconnect', function() {
     if (room) { room.socketDisconnected(socket); }
   });

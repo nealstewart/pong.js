@@ -2,6 +2,47 @@ body {
   font-family: Courier New, Courier, monospace;
 }
 
+.game_board_container {
+  position: relative;
+  width: 500px;
+}
+
+.game_board_container .countdown {
+  position: absolute;
+  color: white;
+  text-align: center;
+  width: 100%;
+  line-height: 300px;
+  font-size: 51px;
+}
+
+.game_board_container button.start {
+  position: absolute;
+  left: 50%;
+  width: 150px;
+  height: 80px;
+  font-size: 30px;
+  margin-left: -75px;
+  top: 50%;
+  margin-top: -40px;
+  display: none;
+  border: 2px outset #ABABAB;
+  background-image: -webkit-linear-gradient(#666, #999);
+  color: #CCC;
+  text-shadow: #FFF 0.5px 1px 1px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.game_board_container button.start:hover {
+  background-image: -webkit-linear-gradient(#777, #999);
+}
+
+.game_board_container button.start:active {
+  border: 2px inset #ABABAB;
+  background-image: -webkit-linear-gradient(#686868, #999);
+}
+
 canvas {
   background-color: black;
 }

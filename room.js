@@ -26,6 +26,18 @@ Room.prototype = {
     });
   },
 
+  emitCountdown : function(currentCount) {
+    this.emit('game-countdown', currentCount);
+  },
+
+  emitGameStart : function(gameState) {
+    this.emit('game-start', gameState);
+  },
+
+  emitGameTick : function(gameState) {
+    this.emit('game-tick', gameState);
+  },
+
   emitPlayers : function(playerWhoJoined) {
     var player1UserName;
     var player2UserName;
@@ -40,12 +52,18 @@ Room.prototype = {
   },
 
   emit : function(channel, message) {
-    if (this.player1) { this.player1.socket.emit(channel, message); }
-    if (this.player2) { this.player2.socket.emit(channel, message); }
+    if (this.player1) { 
+      this.player1.socket.emit(channel, message); 
+    }
+
+    if (this.player2) { 
+      this.player2.socket.emit(channel, message); 
+    }
   },
 
   socketDisconnected : function(socket) {
     var disconnectedPlayer;
+
     if (this.player1 && this.player1.socket == socket) {
       this.player1 = null;
     } else if (this.player2 && this.player2.socket == socket) {
@@ -53,6 +71,20 @@ Room.prototype = {
     }
 
     this.emitPlayers();
+  },
+
+  getPlayerForSocket : function(socket) {
+    if (this.player1 && this.player1.socket == socket) {
+      return this.player1;
+    } else if (this.player2 && this.player2.socket == socket) {
+      return this.player2;
+    }
+  },
+
+  registerPlayerAsReady : function(socket) {
+    var player = this.getPlayerForSocket(socket);
+
+    this.emit('player-ready', player.number);
   }
 };
 

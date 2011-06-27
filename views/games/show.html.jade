@@ -25,7 +25,10 @@ html
             span= room.player2.userName
           - else
             button.join Join
-      canvas.game_board(width=500, height=300)
+      .game_board_container
+        button.start Start
+        .countdown
+        canvas.game_board(width=500, height=300)
 
     script(src="http://documentcloud.github.com/underscore/underscore.js")
     script(src="http://code.jquery.com/jquery-1.6.1.js")
