@@ -1,0 +1,27 @@
+body {
+  font-family: Courier New, Courier, monospace;
+}
+
+canvas {
+  background-color: black;
+}
+
+.players {
+  width: 500px;
+  margin-bottom: 20px;
+  vertical-align: text-top;
+}
+
+.players h1 {
+  padding: 0;
+  margin: 0;
+  margin-right: 10px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.players .player {
+  width: 50%;
+  display: inline-block;
+}
+  

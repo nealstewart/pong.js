@@ -1,0 +1,33 @@
+!!! 5
+html
+  head
+    link(rel="stylesheet", href="/style.css")
+    title
+      | pong.js
+      = room.name
+    
+  body("data-room-name"= room.name)
+    h1 Pong.js
+    h3
+      | Game:
+      = room.name
+    .game_container
+      .players
+        .player.player_1
+          h1 Player 1
+          - if (room.player1)
+            span= room.player1.userName
+          - else
+            button.join Join
+        .player.player_2
+          h1 Player 2
+          - if (room.player2)
+            span= room.player2.userName
+          - else
+            button.join Join
+      canvas.game_board(width=500, height=300)
+
+    script(src="http://documentcloud.github.com/underscore/underscore.js")
+    script(src="http://code.jquery.com/jquery-1.6.1.js")
+    script(src="/socket.io/socket.io.js")
+    script(src="/js/game.js")
