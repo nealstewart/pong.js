@@ -13,20 +13,32 @@ var GameModel = function() {
 };
 
 GameModel.prototype = {
-  startGame : function() {
-    this.master = true;
-    this.gameState = new GameState();
-    this.socket.emit('game-start', this.gameState);
+  startGame : function(slave, initialGameState) {
+    if (!slave) { 
+      this.gameState = new GameState();
+      this.count = 0;
+      this.master = true; 
+      this.socket.emit('game-start', this.gameState.toJSON());
+    } else {
+      this.slave = true;
+      this.gameState = new GameState(initialGameState);
+    }
 
     setTimeout(this.tick, 1000 / 60);
   },
 
   tick : function() {
-    this.socket.emit('game-tick', this.gameState.toJSON());
+    if (this.master) {
+      if (this.count % 20 === 0) {
+        this.socket.emit('game-sync', this.gameState.toJSON());
+      }
 
+      this.count += 1;
+    }
+    this.emit('tick', this.gameState.toJSON());
     this.gameState.tick();
 
-    setTimeout(this.tick, 1000 / 30);
+    setTimeout(this.tick, 1000 / 60);
   },
 
   setupSocket : function(socket) {
@@ -35,10 +47,15 @@ GameModel.prototype = {
     this.socket.on('game-start', function(gameState) {
       game.gameStarted = true;
       game.emit('start', gameState);
+      if (!game.master) {
+        game.startGame(true, gameState);
+      }
     });
 
-    this.socket.on('game-tick', function(gameState) {
-      game.emit('tick', gameState);
+    this.socket.on('game-sync', function(gameState) {
+      if (!game.master) {
+        game.gameState = new GameState(gameState);
+      }
     });
 
     this.socket.on('player-roster', function(currentRoster) {
@@ -73,18 +90,14 @@ GameModel.prototype = {
       var playerNumber = info.playerNumber;
       var direction = info.direction;
       
-      if (game.master) {
-        game.movePlayer(playerNumber, direction);
-      }
+      game.movePlayer(playerNumber, direction);
     });
 
     this.socket.on('game-endmove', function(info) {
       var playerNumber = info.playerNumber;
       var direction = info.direction;
 
-      if (game.master) {
-        game.endMovePlayer(playerNumber, direction);
-      }
+      game.endMovePlayer(playerNumber, direction);
     });
   },
 

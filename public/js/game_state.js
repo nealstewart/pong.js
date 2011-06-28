@@ -24,38 +24,43 @@ function rectanglesIntersect(firstRectangle, secondRectangle) {
   return !firstOutsideSecond;
 }
 
-function GameState() {
-  var xDecider = Math.floor(Math.random() * 2);
-  var xDirection;
-  if (xDecider === 0) {
-    xDirection = LEFT;
-  } else {
-    xDirection = RIGHT;
-  }
-
-  var yVelocity = 3;
-  var xVelocity = xDirection * 10;
-
-  this.ball = {
-    x : ( canvasWidth() / 2 - (BALL_DIAMETER / 2) ),
-    y : ( canvasHeight() / 2 - (BALL_DIAMETER / 2) ),
-    velocity : {
-      x : xVelocity,
-      y : yVelocity
+function GameState(initialGameState) {
+  if (!initialGameState) {
+    var xDecider = Math.floor(Math.random() * 2);
+    var xDirection;
+    if (xDecider === 0) {
+      xDirection = LEFT;
+    } else {
+      xDirection = RIGHT;
     }
-  };
 
-  var paddleStartingY = canvasHeight() / 2 - (PADDLE_HEIGHT / 2);
+    var yVelocity = 3;
+    var xVelocity = xDirection * 10;
 
-  this.leftPlayer = {
-    x : 5,
-    y : paddleStartingY 
-  };
+    this.ball = {
+      x : ( canvasWidth() / 2 - (BALL_DIAMETER / 2) ),
+      y : ( canvasHeight() / 2 - (BALL_DIAMETER / 2) ),
+      velocity : {
+        x : xVelocity,
+        y : yVelocity
+      }
+    };
 
-  this.rightPlayer = { 
-    x : canvasWidth() - PADDLE_WIDTH + 5,
-    y : paddleStartingY 
-  };
+    var paddleStartingY = canvasHeight() / 2 - (PADDLE_HEIGHT / 2);
+
+    this.leftPlayer = {
+      x : 5,
+      y : paddleStartingY 
+    };
+
+    this.rightPlayer = { 
+      x : canvasWidth() - PADDLE_WIDTH + 5,
+      y : paddleStartingY 
+    };
+
+  } else {
+    _.extend(this, initialGameState);
+  }
 
   return this;
 }

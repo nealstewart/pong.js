@@ -55,8 +55,8 @@ Room.prototype = {
     this.emit('game-start', gameState);
   },
 
-  emitGameTick : function(gameState) {
-    this.emit('game-tick', gameState);
+  emitGameSync : function(gameState) {
+    this.emit('game-sync', gameState);
   },
 
   emitPlayers : function(playerWhoJoined) {
@@ -130,7 +130,6 @@ Room.prototype = {
       playerNumber : player.number,
       direction : direction
     });
-  },
-
+  }
 };
 

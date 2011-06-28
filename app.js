@@ -41,8 +41,8 @@ io.sockets.on('connection', function(socket) {
     room.emitGameStart(gameState);
   });
 
-  socket.on('game-tick', function(gameState) {
-    room.emitGameTick(gameState);
+  socket.on('game-sync', function(gameState) {
+    room.emitGameSync(gameState);
   });
 
   socket.on('game-move', function(direction) {
