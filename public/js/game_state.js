@@ -5,6 +5,25 @@ var PADDLE_WIDTH = 10;
 var RIGHT = 1;
 var LEFT = -1;
 
+function rectanglesIntersect(firstRectangle, secondRectangle) {
+  var firstRectangleTop = firstRectangle.y;
+  var firstRectangleBottom = firstRectangle.y + firstRectangle.height;
+  var firstRectangleLeft = firstRectangle.x;
+  var firstRectangleRight = firstRectangle.x + firstRectangle.width;
+
+  var secondRectangleTop = secondRectangle.y;
+  var secondRectangleBottom = secondRectangle.y + secondRectangle.height;
+  var secondRectangleLeft = secondRectangle.x;
+  var secondRectangleRight = secondRectangle.x + secondRectangle.width;
+
+  var firstOutsideSecond = ( firstRectangleLeft > secondRectangleRight || 
+                             firstRectangleBottom < secondRectangleTop || 
+                             firstRectangleTop > secondRectangleBottom ||
+                             firstRectangleRight < secondRectangleLeft);
+
+  return !firstOutsideSecond;
+}
+
 function GameState() {
   var xDecider = Math.floor(Math.random() * 2);
   var xDirection;
@@ -28,15 +47,46 @@ function GameState() {
 
   var paddleStartingY = canvasHeight() / 2 - (PADDLE_HEIGHT / 2);
 
-  this.leftPlayer = { y : paddleStartingY };
-  this.rightPlayer = { y : paddleStartingY };
+  this.leftPlayer = {
+    x : 5,
+    y : paddleStartingY 
+  };
+
+  this.rightPlayer = { 
+    x : canvasWidth() - PADDLE_WIDTH + 5,
+    y : paddleStartingY 
+  };
 
   return this;
 }
 
 GameState.prototype = {
+  resetBall : function() {
+    this.ball.x = ( canvasWidth() / 2 - (BALL_DIAMETER / 2) );
+    this.ball.y = ( canvasHeight() / 2 - (BALL_DIAMETER / 2) );
+  },
+
   tick : function() {
+    this.movePlayers();
     this.moveBall();
+  },
+
+  movePlayer : function(player) {
+    if (player.down && player.y + PADDLE_HEIGHT < canvasHeight()) {
+      player.y += 5;
+
+    } else if (player.up && player.y >= 0) {
+      player.y -= 5;
+    } else if (player.up) {
+      player.y = 0;
+    } else if (player.down) {
+      player.y = canvasHeight() - PADDLE_HEIGHT;
+    }
+  },
+
+  movePlayers : function() {
+    this.movePlayer(this.rightPlayer);
+    this.movePlayer(this.leftPlayer);
   },
 
   moveBall : function() {
@@ -48,14 +98,6 @@ GameState.prototype = {
         top = this.ball.y,
         bottom = this.ball.y + BALL_DIAMETER;
 
-    if (leftEdge < 0) {
-      this.ball.x = 0;
-      this.ball.velocity.x = -this.ball.velocity.x;
-    } else if (rightEdge > canvasWidth()) {
-      this.ball.x = canvasWidth() - BALL_DIAMETER;
-      this.ball.velocity.x = -this.ball.velocity.x;
-    }
-
     if (top < 0) {
       this.ball.y = 0;
       this.ball.velocity.y = -this.ball.velocity.y;
@@ -63,6 +105,58 @@ GameState.prototype = {
       this.ball.y = canvasHeight() - BALL_DIAMETER;
       this.ball.velocity.y = -this.ball.velocity.y;
     }
+
+    if (leftEdge < (0 - BALL_DIAMETER)) {
+      this.resetBall();
+    } else if (rightEdge > canvasWidth() + BALL_DIAMETER) {
+      this.resetBall();
+    }
+
+    if (this.ballIntersectsWithPlayer(this.rightPlayer) || 
+        this.ballIntersectsWithPlayer(this.leftPlayer)) {
+     this.ball.velocity.x = -this.ball.velocity.x;
+    }
+  },
+
+  ballIntersectsWithPlayer : function(player) {
+    var playerRect = {
+      x : player.x,
+      y : player.y,
+      width: PADDLE_WIDTH,
+      height: PADDLE_HEIGHT
+    };
+
+    var ballRect = {
+      x : this.ball.x,
+      y : this.ball.y,
+      width: BALL_DIAMETER,
+      height: BALL_DIAMETER
+    };
+
+    return rectanglesIntersect(playerRect, ballRect);
+  },
+
+  getPlayerByNumber : function(playerNumber) {
+    var player;
+    if (playerNumber == 1) {
+      player = this.leftPlayer;
+    } else if (playerNumber == 2) {
+      player = this.rightPlayer;
+    } else {
+      throw "improper player number" + 3;
+    }
+
+    return player;
+  },
+
+  markPlayerNumberAsMoving : function(playerNumber, direction) {
+    var player = this.getPlayerByNumber(playerNumber);
+    player[direction] = true;
+  },
+
+  unmarkPlayerNumberAsMoving : function(playerNumber, direction) {
+    var player = this.getPlayerByNumber(playerNumber);
+    player[direction] = false;
   },
 
   toJSON : function() {

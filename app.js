@@ -45,6 +45,14 @@ io.sockets.on('connection', function(socket) {
     room.emitGameTick(gameState);
   });
 
+  socket.on('game-move', function(direction) {
+    room.beginMove(socket, direction);
+  });
+
+  socket.on('game-endmove', function(direction) {
+    room.endMove(socket, direction);
+  });
+
   socket.on('disconnect', function() {
     if (room) { room.socketDisconnected(socket); }
   });

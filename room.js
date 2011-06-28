@@ -10,6 +10,20 @@ var Room = function(name) {
   this.observers = [];
 };
 
+_.extend(Room, {
+  findOrCreateByName : function(roomName) {
+    var room = rooms[roomName];
+
+    if (!room) {
+      room = rooms[roomName] = new Room(roomName);
+    }
+
+    return room;
+  }
+});
+
+exports.Room = Room;
+
 Room.prototype = {
   addObserver : function(socket) {
     this.observers.push(socket);
@@ -100,19 +114,23 @@ Room.prototype = {
     var player = this.getPlayerForSocket(socket);
 
     this.emit('player-ready', player.number);
-  }
+  },
+
+  beginMove : function(socket, direction) {
+    var player = this.getPlayerForSocket(socket);
+    this.emit('game-move', {
+      playerNumber : player.number,
+      direction : direction
+    });
+  },
+
+  endMove : function(socket, direction) {
+    var player = this.getPlayerForSocket(socket);
+    this.emit('game-endmove', {
+      playerNumber : player.number,
+      direction : direction
+    });
+  },
+
 };
 
-_.extend(Room, {
-  findOrCreateByName : function(roomName) {
-    var room = rooms[roomName];
-
-    if (!room) {
-      room = rooms[roomName] = new Room(roomName);
-    }
-
-    return room;
-  }
-});
-
-exports.Room = Room;

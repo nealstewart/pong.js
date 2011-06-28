@@ -14,6 +14,7 @@ var GameModel = function() {
 
 GameModel.prototype = {
   startGame : function() {
+    this.master = true;
     this.gameState = new GameState();
     this.socket.emit('game-start', this.gameState);
 
@@ -25,13 +26,14 @@ GameModel.prototype = {
 
     this.gameState.tick();
 
-    setTimeout(this.tick, 1000 / 60);
+    setTimeout(this.tick, 1000 / 30);
   },
 
   setupSocket : function(socket) {
     var game = this; 
 
     this.socket.on('game-start', function(gameState) {
+      game.gameStarted = true;
       game.emit('start', gameState);
     });
 
@@ -66,15 +68,38 @@ GameModel.prototype = {
     this.socket.on('game-countdown', function(currentCount) {
       game.emit('countdown', currentCount);
     });
+
+    this.socket.on('game-move', function(info) {
+      var playerNumber = info.playerNumber;
+      var direction = info.direction;
+      
+      if (game.master) {
+        game.movePlayer(playerNumber, direction);
+      }
+    });
+
+    this.socket.on('game-endmove', function(info) {
+      var playerNumber = info.playerNumber;
+      var direction = info.direction;
+
+      if (game.master) {
+        game.endMovePlayer(playerNumber, direction);
+      }
+    });
+  },
+
+  movePlayer : function(playerNumber, direction) {
+    this.gameState.markPlayerNumberAsMoving(playerNumber, direction);
+  },
+
+  endMovePlayer : function(playerNumber, direction) {
+    this.gameState.unmarkPlayerNumberAsMoving(playerNumber, direction);
   },
 
   countdown : function() {
     var currentCount = 3;
-    console.log("countdown was called");
 
     var _countdown = function() {
-      console.log("_countdown was called");
-      debugger;
       this.socket.emit('game-countdown', currentCount);
 
       if (currentCount > 0) {
@@ -102,6 +127,18 @@ GameModel.prototype = {
 
   join : function(info) {
     this.socket.emit('room-connect', info);
+  },
+
+  requestMove : function(direction) {
+    if (this.gameStarted) {
+      this.socket.emit('game-move', direction);
+    }
+  },
+
+  requestEndMove : function(direction) {
+    if (this.gameStarted) {
+      this.socket.emit('game-endmove', direction);
+    }
   }
 };
 

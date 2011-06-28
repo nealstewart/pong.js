@@ -18,6 +18,36 @@ function GameView() {
     game.registerAsReady();
   });
 
+  $(document).keydown(function(evt) {
+    switch (evt.keyCode) {
+      case 40 :
+        game.requestMove('down');
+        break;
+
+      case 38 :
+        game.requestMove('up');
+        break;
+
+      default :
+        break;
+    }
+  });
+
+  $(document).keyup(function(evt) {
+    switch (evt.keyCode) {
+      case 40 :
+        game.requestEndMove('down');
+        break;
+
+      case 38 :
+        game.requestEndMove('up');
+        break;
+
+      default :
+        break;
+    }
+  });
+
   _.bindAll(this,
             'setPlayers',
             'drawGameState',
@@ -71,7 +101,7 @@ GameView.prototype = {
       playerEl.append('<span>'+userName+'</span>');
     } else {
       playerEl.append('<button class=join>Join</button>');
-      if (game.currentPlayer) {
+      if (this.game.currentPlayer) {
         playerEl.find('button').attr('disabled', 'disabled');
       }
     }
