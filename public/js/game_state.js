@@ -77,18 +77,26 @@ GameState.prototype = {
   },
 
   tick : function() {
+    var currentMoveTime = (new Date()).getTime();
+    this.millisecondsSinceLastTick = (this.lastMoveTime ? currentMoveTime - this.lastMoveTime : (1000 / 60));
+    this.lastMoveTime = this.currentMoveTime;
     this.movePlayers();
     this.moveBall();
   },
 
-  movePlayer : function(player) {
-    if (player.down && player.y + PADDLE_HEIGHT < canvasHeight()) {
-      player.y += 5;
+  getTimeConvertedDistanceForSpeed : function(speed) {
+    var distanceForTime = (this.millisecondsSinceLastTick / (1000 / 60) * speed);
+    return distanceForTime;
+  },
 
+  movePlayer : function(player) {
+    var playerDistance = this.getTimeConvertedDistanceForSpeed(5);
+    if (player.down && player.y + PADDLE_HEIGHT < canvasHeight()) {
+      player.y += playerDistance;
     } else if (player.up && player.y >= 0) {
-      player.y -= 5;
+      player.y -= playerDistance;
     } else if (player.up) {
-      player.y = 0;
+      player.y = playerDistance;
     } else if (player.down) {
       player.y = canvasHeight() - PADDLE_HEIGHT;
     }
@@ -100,8 +108,8 @@ GameState.prototype = {
   },
 
   moveBall : function() {
-    this.ball.x = this.ball.x + this.ball.velocity.x;
-    this.ball.y = this.ball.y + this.ball.velocity.y;
+    this.ball.x = this.ball.x + this.getTimeConvertedDistanceForSpeed(this.ball.velocity.x);
+    this.ball.y = this.ball.y + this.getTimeConvertedDistanceForSpeed(this.ball.velocity.y);
 
     var leftEdge = this.ball.x,
         rightEdge = this.ball.x + BALL_DIAMETER,
@@ -122,10 +130,22 @@ GameState.prototype = {
       this.resetBall();
     }
 
-    if (this.ballIntersectsWithPlayer(this.rightPlayer) || 
-        this.ballIntersectsWithPlayer(this.leftPlayer)) {
-     this.ball.velocity.x = -this.ball.velocity.x;
+    if (this.ballCanCollide) {
+      if (this.ballIntersectsWithPlayer(this.rightPlayer) || 
+          this.ballIntersectsWithPlayer(this.leftPlayer)) {
+        this.ball.velocity.x = -this.ball.velocity.x;
+
+        this.ballCanCollide = false;
+        this.timeBallCollided = (new Date()).getTime();
+      }
+    } else {
+      var currentTime = (new Date()).getTime();
+
+      if ((currentTime - this.timeBallCollided > 500)) {
+        this.ballCanCollide = true;
+      }
     }
+
   },
 
   ballIntersectsWithPlayer : function(player) {
