@@ -139,7 +139,7 @@ GameView.prototype = {
       gameState.leftPlayer.y);
 
     this.drawPlayer(
-      canvasWidth() - 5 - PADDLE_WIDTH / 2, 
+      canvasWidth() - 5 - PADDLE_WIDTH, 
       gameState.rightPlayer.y);
   },
 
