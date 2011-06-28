@@ -68,6 +68,9 @@ function GameState(initialGameState) {
 }
 
 GameState.prototype = {
+  ballNearSide : function() {
+    return this.ball.x < 40 || this.ball.x > canvasWidth() - 40;
+  },
   resetBall : function() {
     this.ball.x = ( canvasWidth() / 2 - (BALL_DIAMETER / 2) );
     this.ball.y = ( canvasHeight() / 2 - (BALL_DIAMETER / 2) );

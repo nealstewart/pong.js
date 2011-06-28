@@ -29,7 +29,8 @@ GameModel.prototype = {
 
   tick : function() {
     if (this.master) {
-      if (this.count % 20 === 0) {
+      var ballIsNearSide = this.gameState.ballNearSide();
+      if (ballIsNearSide && this.count % 20 === 0) {
         this.socket.emit('game-sync', this.gameState.toJSON());
       }
 
