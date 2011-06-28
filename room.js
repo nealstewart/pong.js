@@ -6,11 +6,18 @@ var Room = function(name) {
   console.log("constructor has", name);
   this.player1 = null;
   this.player2 = null;
+
+  this.observers = [];
 };
 
 Room.prototype = {
+  addObserver : function(socket) {
+    this.observers.push(socket);
+  },
+
   join : function(socket, playerNumber, userName) {
     if (!_.include([1, 2], playerNumber)) throw "improper player number";
+    this.observers = _.without(this.observers, socket);
 
     var playerWhoJoined = this["player"+playerNumber] = {
       socket : socket,
@@ -59,6 +66,10 @@ Room.prototype = {
     if (this.player2) { 
       this.player2.socket.emit(channel, message); 
     }
+
+    _.each(this.observers, function(socket) {
+      socket.emit(channel, message);
+    });
   },
 
   socketDisconnected : function(socket) {
@@ -68,7 +79,11 @@ Room.prototype = {
       this.player1 = null;
     } else if (this.player2 && this.player2.socket == socket) {
       this.player2 = null;
+    } else {
+      this.observers = _.without(this.observers, socket);
     }
+
+
 
     this.emitPlayers();
   },

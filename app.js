@@ -15,6 +15,10 @@ var Room = require('room').Room;
 
 io.sockets.on('connection', function(socket) {
   var room;
+  socket.on('room-observer', function(roomName) {
+    room = Room.findOrCreateByName(roomName);
+    room.addObserver(socket);
+  });
   socket.on('room-connect', function(info) {
     var roomName = info.roomName,
         userName = info.userName,
