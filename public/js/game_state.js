@@ -25,6 +25,8 @@ function rectanglesIntersect(firstRectangle, secondRectangle) {
 }
 
 function GameState(initialGameState) {
+  this.ballCanCollide = true;
+
   if (!initialGameState) {
     var xDecider = Math.floor(Math.random() * 2);
     var xDirection;
