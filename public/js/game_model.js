@@ -20,6 +20,7 @@ GameModel.prototype = {
   },
 
   startGame : function(slave, initialGameState) {
+    this.gameStarted = true;
     this.stopped = false; 
 
     if (!slave) { 
@@ -56,7 +57,6 @@ GameModel.prototype = {
     var game = this; 
 
     this.socket.on('game-start', function(gameState) {
-      game.gameStarted = true;
       game.emit('start', gameState);
       if (!game.master) {
         game.startGame(true, gameState);
@@ -66,6 +66,10 @@ GameModel.prototype = {
     this.socket.on('game-sync', function(gameState) {
       if (!game.master) {
         game.gameState = new GameState(gameState);
+
+        if (!game.gameStarted) {
+          game.startGame(true, gameState);
+        }
       }
     });
 
@@ -75,7 +79,7 @@ GameModel.prototype = {
 
       var twoPlayers = (currentRoster.player1 && currentRoster.player2);
       
-      if (twoPlayers) { 
+      if (twoPlayers && !game.gameStarted) { 
         game.emit('two-players');
       }
 
