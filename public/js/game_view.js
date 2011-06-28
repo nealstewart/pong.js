@@ -49,6 +49,7 @@ function GameView() {
   });
 
   _.bindAll(this,
+            'reset',
             'setPlayers',
             'drawGameState',
             'hideCountdown',
@@ -63,9 +64,30 @@ function GameView() {
   this.game.on('start', this.hideCountdown);
   this.game.on('tick', this.drawGameState);
   this.game.on('player-roster', this.setPlayers);
+  this.game.on('reset', this.reset);
 }
 
 GameView.prototype = {
+  clearCanvas : function() {
+    var canvas = $('canvas').get(0);
+    this.context.clearRect(0, 0, canvas.width, canvas.height);
+    var w = canvas.width;
+    canvas.width = 1;
+    canvas.width = w;
+  },
+
+  reset : function() {
+    debugger;
+    if (!this.context) {
+      var canvasEl = $('canvas').get(0);
+      this.context = canvasEl.getContext('2d');
+    }
+
+    this.clearCanvas();
+    this.hideCountdown();
+    this.hideStartButton();
+
+  },
   joinAs : function(playerNumber) {
     var userName = prompt("Enter your name:");
 
@@ -86,6 +108,10 @@ GameView.prototype = {
   },
   disableJoinButtons : function() {
     $('.players button').attr('disabled', 'disabled');
+  },
+
+  hideStartButton : function() {
+    $('button.start').hide();
   },
 
   showStartButton : function() {
@@ -127,10 +153,11 @@ GameView.prototype = {
       this.context = canvasEl.getContext('2d');
     }
 
-    this.context.clearRect(0, 0, canvasWidth(), canvasHeight());
-
-    this.drawPlayers(gameState);
-    this.drawBall(gameState);
+    this.clearCanvas();
+    if (!this.game.stopped) {
+      this.drawPlayers(gameState);
+      this.drawBall(gameState);
+    }
   },
 
   drawPlayers : function(gameState) {

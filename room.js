@@ -39,7 +39,7 @@ Room.prototype = {
       number : playerNumber
     };
 
-    this.emitPlayers(playerWhoJoined);
+    this.emitPlayers();
 
     playerWhoJoined.socket.emit('room-connected', {
       number : playerWhoJoined.number,
@@ -59,7 +59,7 @@ Room.prototype = {
     this.emit('game-sync', gameState);
   },
 
-  emitPlayers : function(playerWhoJoined) {
+  emitPlayers : function(playerDisconnected) {
     var player1UserName;
     var player2UserName;
 
@@ -68,7 +68,8 @@ Room.prototype = {
 
     this.emit('player-roster', {
       player1 : player1UserName,
-      player2 : player2UserName 
+      player2 : player2UserName,
+      playerDisconnected : playerDisconnected
     });
   },
 
@@ -88,18 +89,19 @@ Room.prototype = {
 
   socketDisconnected : function(socket) {
     var disconnectedPlayer;
+    var playerDisconnected = false;
 
     if (this.player1 && this.player1.socket == socket) {
+      playerDisconnected = true;
       this.player1 = null;
     } else if (this.player2 && this.player2.socket == socket) {
+      playerDisconnected = true;
       this.player2 = null;
     } else {
       this.observers = _.without(this.observers, socket);
     }
 
-
-
-    this.emitPlayers();
+    this.emitPlayers(playerDisconnected);
   },
 
   getPlayerForSocket : function(socket) {

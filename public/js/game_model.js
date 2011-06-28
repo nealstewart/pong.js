@@ -13,7 +13,15 @@ var GameModel = function() {
 };
 
 GameModel.prototype = {
+  reset : function() {
+    this.stopped = true;
+    this.emit('reset');
+    this.otherPlayerReadyToPlay = false;
+  },
+
   startGame : function(slave, initialGameState) {
+    this.stopped = false; 
+
     if (!slave) { 
       this.gameState = new GameState();
       this.count = 0;
@@ -23,7 +31,7 @@ GameModel.prototype = {
       this.slave = true;
       this.gameState = new GameState(initialGameState);
     }
-
+    
     setTimeout(this.tick, 1000 / 60);
   },
 
@@ -39,7 +47,9 @@ GameModel.prototype = {
     this.emit('tick', this.gameState.toJSON());
     this.gameState.tick();
 
-    setTimeout(this.tick, 1000 / 60);
+    if (!this.stopped) {
+      setTimeout(this.tick, 1000 / 60);
+    }
   },
 
   setupSocket : function(socket) {
@@ -67,6 +77,11 @@ GameModel.prototype = {
       
       if (twoPlayers) { 
         game.emit('two-players');
+      }
+
+      var playerDisconnected = currentRoster.playerDisconnected;
+      if (currentRoster.playerDisconnected) {
+        game.reset();
       }
     });
 
