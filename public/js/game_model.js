@@ -56,12 +56,11 @@ GameModel.prototype = {
     };
 
     this.socket.on('game-start', function(gameState) {
-      hideCountdown();
-      drawGameState(gameState);
+      game.emit('start', gameState);
     });
 
     this.socket.on('game-tick', function(gameState) {
-      drawGameState(gameState);
+      game.emit('tick', gameState);
     });
 
     this.socket.on('player-roster', function(currentRoster) {
@@ -69,12 +68,15 @@ GameModel.prototype = {
 
       var twoPlayers = (currentRoster.player1 && currentRoster.player2);
       
-      if (twoPlayers) { showStartButton(); }
+      if (twoPlayers) { 
+        game.emit('two-players');
+      }
     });
 
     this.socket.on('room-connected', function(info) {
       game.currentPlayer = info;
-      disableJoinButtons();
+
+      game.emit('current-user-joined');
     });
 
     this.socket.on('player-ready', function(playerNumber) {
@@ -84,7 +86,9 @@ GameModel.prototype = {
       }
     });
 
-    this.socket.on('game-countdown', drawCountdown);
+    this.socket.on('game-countdown', function(currentCount) {
+      game.emit('countdown', currentCount);
+    });
   },
 
   countdown : function() {
@@ -138,4 +142,5 @@ GameModel.prototype = {
 };
 
 window.GameModel = GameModel;
+_.extend(GameModel.prototype, new io.EventEmitter());
 })();
