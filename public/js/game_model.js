@@ -31,30 +31,6 @@ GameModel.prototype = {
   setupSocket : function(socket) {
     var game = this; 
 
-    var setPlayer = function(playerEl, userName) {
-      playerEl.find('button').remove();
-      playerEl.find('span').remove();
-
-      if (userName) {
-        playerEl.append('<span>'+userName+'</span>');
-      } else {
-        playerEl.append('<button class=join>Join</button>');
-        if (game.currentPlayer) {
-          playerEl.find('button').attr('disabled', 'disabled');
-        }
-      }
-    };
-
-    var setPlayers = function(playerInfo) {
-      var player1El = $('.player_1');
-      var player2El = $('.player_2');
-
-      setPlayer(player1El, playerInfo.player1);
-      setPlayer(player2El, playerInfo.player2);
-
-      game.currentRoster = playerInfo;
-    };
-
     this.socket.on('game-start', function(gameState) {
       game.emit('start', gameState);
     });
@@ -64,7 +40,8 @@ GameModel.prototype = {
     });
 
     this.socket.on('player-roster', function(currentRoster) {
-      setPlayers(currentRoster);
+      game.currentRoster = currentRoster;
+      game.emit('player-roster', currentRoster);
 
       var twoPlayers = (currentRoster.player1 && currentRoster.player2);
       
@@ -123,21 +100,8 @@ GameModel.prototype = {
     }
   },
 
-  joinAs : function(playerNumber) {
-    var userName = prompt("Enter your name:");
-
-    if (userName) $.trim(userName);
-    if (!userName) {
-      return;
-    } else {
-      var roomName = $('body').data('room-name');
-
-      this.socket.emit('room-connect', {
-        playerNumber : playerNumber, 
-        roomName : roomName,
-        userName : userName
-      });
-    }
+  join : function(info) {
+    this.socket.emit('room-connect', info);
   }
 };
 

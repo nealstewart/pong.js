@@ -18,8 +18,8 @@ function GameState() {
   var xVelocity = xDirection * 10;
 
   this.ball = {
-    x : canvasWidth() / 2 - (BALL_DIAMETER / 2),
-    y : canvasHeight() / 2 - (BALL_DIAMETER / 2),
+    x : ( canvasWidth() / 2 - (BALL_DIAMETER / 2) ),
+    y : ( canvasHeight() / 2 - (BALL_DIAMETER / 2) ),
     velocity : {
       x : xVelocity,
       y : yVelocity

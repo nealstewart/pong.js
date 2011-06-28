@@ -4,13 +4,14 @@ var PLAYER_2 = 2;
 function GameView() {
   this.game = new GameModel();
   var game = this.game;
+  var that = this;
 
   $('.player_1').delegate('.join', 'click', function() {
-    game.joinAs(PLAYER_1);
+    that.joinAs(PLAYER_1);
   });
 
   $('.player_2').delegate('.join', 'click', function() {
-    game.joinAs(PLAYER_2);
+    that.joinAs(PLAYER_2);
   });
 
   $('button.start').click(function() {
@@ -18,6 +19,7 @@ function GameView() {
   });
 
   _.bindAll(this,
+            'setPlayers',
             'drawGameState',
             'hideCountdown',
             'showStartButton',
@@ -30,9 +32,28 @@ function GameView() {
   this.game.on('start', this.drawGameState);
   this.game.on('start', this.hideCountdown);
   this.game.on('tick', this.drawGameState);
+  this.game.on('player-roster', this.setPlayers);
 }
 
 GameView.prototype = {
+  joinAs : function(playerNumber) {
+    var userName = prompt("Enter your name:");
+
+    if (userName) $.trim(userName);
+
+    if (!userName) {
+      return;
+
+    } else {
+      var roomName = $('body').data('room-name');
+
+      this.game.join({
+        playerNumber : playerNumber, 
+        roomName : roomName,
+        userName : userName
+      });
+    }
+  },
   disableJoinButtons : function() {
     $('.players button').attr('disabled', 'disabled');
   },
@@ -40,6 +61,30 @@ GameView.prototype = {
   showStartButton : function() {
     var buttonEl = $('button.start').text('Start');
     buttonEl.show();
+  },
+
+  setPlayer : function(playerEl, userName) {
+    playerEl.find('button').remove();
+    playerEl.find('span').remove();
+
+    if (userName) {
+      playerEl.append('<span>'+userName+'</span>');
+    } else {
+      playerEl.append('<button class=join>Join</button>');
+      if (game.currentPlayer) {
+        playerEl.find('button').attr('disabled', 'disabled');
+      }
+    }
+  },
+
+  setPlayers : function(playerInfo) {
+    var player1El = $('.player_1');
+    var player2El = $('.player_2');
+
+    this.setPlayer(player1El, playerInfo.player1);
+    this.setPlayer(player2El, playerInfo.player2);
+
+    this.game.currentRoster = playerInfo;
   },
 
   hideCountdown : function() {
