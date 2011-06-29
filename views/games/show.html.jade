@@ -17,12 +17,14 @@ html
           h1 Player 1
           - if (room.player1)
             span= room.player1.userName
+            .score 0
           - else
             button.join Join
         .player.player_2
           h1 Player 2
           - if (room.player2)
             span= room.player2.userName
+            .score 0
           - else
             button.join Join
       .game_board_container

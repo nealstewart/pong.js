@@ -122,9 +122,10 @@ GameView.prototype = {
   setPlayer : function(playerEl, userName) {
     playerEl.find('button').remove();
     playerEl.find('span').remove();
+    playerEl.find('.score').remove();
 
     if (userName) {
-      playerEl.append('<span>'+userName+'</span>');
+      playerEl.append('<span>'+userName+'</span><div class=score>0</div>');
     } else {
       playerEl.append('<button class=join>Join</button>');
       if (this.game.currentPlayer) {
@@ -157,7 +158,13 @@ GameView.prototype = {
     if (!this.game.stopped) {
       this.drawPlayers(gameState);
       this.drawBall(gameState);
+      this.drawScore(gameState);
     }
+  },
+
+  drawScore : function(gameState) {
+    $('.player_1 .score').text(gameState.leftPlayer.score);
+    $('.player_2 .score').text(gameState.rightPlayer.score);
   },
 
   drawPlayers : function(gameState) {

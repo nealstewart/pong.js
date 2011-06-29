@@ -28,36 +28,20 @@ function GameState(initialGameState) {
   this.ballCanCollide = true;
 
   if (!initialGameState) {
-    var xDecider = Math.floor(Math.random() * 2);
-    var xDirection;
-    if (xDecider === 0) {
-      xDirection = LEFT;
-    } else {
-      xDirection = RIGHT;
-    }
-
-    var yVelocity = 3;
-    var xVelocity = xDirection * 10;
-
-    this.ball = {
-      x : ( canvasWidth() / 2 - (BALL_DIAMETER / 2) ),
-      y : ( canvasHeight() / 2 - (BALL_DIAMETER / 2) ),
-      velocity : {
-        x : xVelocity,
-        y : yVelocity
-      }
-    };
+    this.resetBall();
 
     var paddleStartingY = canvasHeight() / 2 - (PADDLE_HEIGHT / 2);
 
     this.leftPlayer = {
       x : 5,
-      y : paddleStartingY 
+      y : paddleStartingY,
+      score : 0
     };
 
     this.rightPlayer = { 
       x : canvasWidth() - PADDLE_WIDTH + 5,
-      y : paddleStartingY 
+      y : paddleStartingY,
+      score : 0
     };
 
   } else {
@@ -73,8 +57,33 @@ GameState.prototype = {
   },
 
   resetBall : function() {
-    this.ball.x = ( canvasWidth() / 2 - (BALL_DIAMETER / 2) );
-    this.ball.y = ( canvasHeight() / 2 - (BALL_DIAMETER / 2) );
+    var xDecider = Math.floor(Math.random() * 2);
+    var xDirection;
+    if (xDecider === 0) {
+      xDirection = LEFT;
+    } else {
+      xDirection = RIGHT;
+    }
+
+    var yDecider = Math.floor(Math.random() * 2);
+    var yDirection;
+    if (yDecider === 0) {
+      yDirection = LEFT;
+    } else {
+      yDirection = RIGHT;
+    }
+
+    var yVelocity = 3 * yDirection;
+    var xVelocity = xDirection * 5;
+
+    this.ball = {
+      x : ( canvasWidth() / 2 - (BALL_DIAMETER / 2) ),
+      y : ( canvasHeight() / 2 - (BALL_DIAMETER / 2) ),
+      velocity : {
+        x : xVelocity,
+        y : yVelocity
+      }
+    };
   },
 
   tick : function() {
@@ -83,6 +92,42 @@ GameState.prototype = {
     this.lastMoveTime = this.currentMoveTime;
     this.movePlayers();
     this.moveBall();
+
+    if (this.ballIsOutOfBounds()) {
+      this.recordScore();
+      this.resetBall();
+      this.emit('score');
+    }
+  },
+
+  recordScore : function() {
+    if (this.ballIsOutOfBoundsToLeft()) {
+      this.leftPlayer.score += 1;
+    } else {
+      this.rightPlayer.score += 1;
+    }
+  },
+
+  playerWhoScored : function() {
+
+  },
+
+  ballIsOutOfBoundsToLeft : function() {
+    var leftEdge = this.ball.x,
+        rightEdge = this.ball.x + BALL_DIAMETER,
+        top = this.ball.y,
+        bottom = this.ball.y + BALL_DIAMETER;
+
+    return leftEdge < (0 - BALL_DIAMETER);
+  },
+
+  ballIsOutOfBoundsToRight : function() {
+    var leftEdge = this.ball.x,
+        rightEdge = this.ball.x + BALL_DIAMETER,
+        top = this.ball.y,
+        bottom = this.ball.y + BALL_DIAMETER;
+
+    return rightEdge > (canvasWidth() + BALL_DIAMETER);
   },
 
   getTimeConvertedDistanceForSpeed : function(speed) {
@@ -125,16 +170,10 @@ GameState.prototype = {
       this.ball.velocity.y = -this.ball.velocity.y;
     }
 
-    if (leftEdge < (0 - BALL_DIAMETER)) {
-      this.resetBall();
-    } else if (rightEdge > canvasWidth() + BALL_DIAMETER) {
-      this.resetBall();
-    }
-
     if (this.ballCanCollide) {
       if (this.ballIntersectsWithPlayer(this.rightPlayer) || 
           this.ballIntersectsWithPlayer(this.leftPlayer)) {
-        this.ball.velocity.x = -this.ball.velocity.x;
+        this.ball.velocity.x = -(1.05 * this.ball.velocity.x);
 
         this.ballCanCollide = false;
         this.timeBallCollided = (new Date()).getTime();
@@ -147,6 +186,14 @@ GameState.prototype = {
       }
     }
 
+  },
+
+  ballIsOutOfBounds : function() {
+    if (this.ballIsOutOfBoundsToLeft()) {
+      return true;
+    } else if (this.ballIsOutOfBoundsToRight()) {
+      return true;
+    }
   },
 
   ballIntersectsWithPlayer : function(player) {
@@ -198,3 +245,5 @@ GameState.prototype = {
     };
   }
 };
+
+_.extend(GameState.prototype, new io.EventEmitter());

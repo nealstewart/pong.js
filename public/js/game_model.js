@@ -32,19 +32,29 @@ GameModel.prototype = {
       this.slave = true;
       this.gameState = new GameState(initialGameState);
     }
+
+    var that = this;
+    if (this.master) {
+      this.gameState.on('score', function() {
+        that.socket.emit('game-sync', that.gameState.toJSON());
+      });
+    }
     
+
     setTimeout(this.tick, 1000 / 60);
   },
 
   tick : function() {
     if (this.master) {
       var ballIsNearSide = this.gameState.ballNearSide();
-      if (ballIsNearSide && this.count % 20 === 0) {
+      if (ballIsNearSide && this.count % 4 === 0) {
         this.socket.emit('game-sync', this.gameState.toJSON());
+        console.log('syncing');
       }
 
       this.count += 1;
     }
+
     this.emit('tick', this.gameState.toJSON());
     this.gameState.tick();
 
@@ -90,6 +100,7 @@ GameModel.prototype = {
     });
 
     this.socket.on('room-connected', function(info) {
+      game.playing = true;
       game.currentPlayer = info;
 
       game.emit('current-user-joined');
@@ -110,14 +121,18 @@ GameModel.prototype = {
       var playerNumber = info.playerNumber;
       var direction = info.direction;
       
-      game.movePlayer(playerNumber, direction);
+      if (game.gameStarted) {
+        game.movePlayer(playerNumber, direction);
+      }
     });
 
     this.socket.on('game-endmove', function(info) {
       var playerNumber = info.playerNumber;
       var direction = info.direction;
 
-      game.endMovePlayer(playerNumber, direction);
+      if (game.gameStarted) {
+        game.endMovePlayer(playerNumber, direction);
+      }
     });
   },
 
@@ -163,13 +178,13 @@ GameModel.prototype = {
   },
 
   requestMove : function(direction) {
-    if (this.gameStarted) {
+    if (this.playing) {
       this.socket.emit('game-move', direction);
     }
   },
 
   requestEndMove : function(direction) {
-    if (this.gameStarted) {
+    if (this.playing) {
       this.socket.emit('game-endmove', direction);
     }
   }
