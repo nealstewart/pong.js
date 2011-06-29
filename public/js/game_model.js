@@ -1,6 +1,6 @@
 (function() {
 var GameModel = function() {
-  this.socket = io.connect('http://localhost');
+  this.socket = io.connect();
 
   var roomName = $('body').data('room-name');
   this.socket.emit('room-observer', roomName);
