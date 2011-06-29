@@ -11,7 +11,7 @@ app.set('view options', {
 });
 
 var io = require('socket.io').listen(app);
-var Room = require('room').Room;
+var Room = require('./room').Room;
 
 io.sockets.on('connection', function(socket) {
   var room;
