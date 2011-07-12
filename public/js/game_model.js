@@ -3,6 +3,10 @@ var GameModel = function() {
   this.socket = io.connect();
   window.MySocket = this.socket;
 
+  this.socket.on('connection', function() {
+    alert("boogers");
+  });
+
   var roomName = $('body').data('room-name');
   this.socket.emit('room-observer', roomName);
 
