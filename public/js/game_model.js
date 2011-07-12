@@ -3,7 +3,7 @@ var GameModel = function() {
   this.socket = io.connect();
   window.MySocket = this.socket;
 
-  this.socket.on('connection', function() {
+  this.socket.on('connect', function() {
     alert("boogers");
   });
 
