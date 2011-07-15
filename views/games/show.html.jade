@@ -11,7 +11,11 @@ html
     h3
       | Game:
       = room.name
-    .game_container
+
+    .connecting_notifier
+      | Connecting ... 
+
+    .game_container("style"="display:none")
       .players
         .player.player_1
           h1 Player 1

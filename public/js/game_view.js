@@ -65,6 +65,7 @@ function GameView() {
   this.game.on('tick', this.drawGameState);
   this.game.on('player-roster', this.setPlayers);
   this.game.on('reset', this.reset);
+  this.game.on('connected', this.connected);
 }
 
 GameView.prototype = {
@@ -74,6 +75,11 @@ GameView.prototype = {
     var w = canvas.width;
     canvas.width = 1;
     canvas.width = w;
+  },
+
+  connected : function() {
+    $('.connecting_notifier').hide();
+    $('.game_container').show();
   },
 
   reset : function() {
